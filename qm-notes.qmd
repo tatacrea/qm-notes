@@ -1,0 +1,22 @@
+---
+title: "qm-notes"
+author: "kayla"
+format: typst
+---
+
+# Lecture 2
+
+## Classical probability
+
+Classical probability is the study of probability in the absence of data. Therefore, definitions and concept in this paradigm are built upon relations between discrete events and cardinalities of sets. In the absence of data, we conceptualise probability as the ratio between the *cardinality of the set of outcomes in an event* and that of *the sample space*, where the sample space is the set of all possible outcomes.
+
+Letting $E = \{e_1, e_2, ..., e_m\}$ be some event with $m$ outcomes and $S = \{e_1, ..., e_m, e_{m+1}, ..., e_n\}$ represent the sample space,
+
+$$\Pr(E) = \frac{|E|}{|S|}$$
+
+An illustrative example is the theoretical 'concept' of rolling an equal-probability die, let's say a cubical die. In practice, the running *empirical* probability of rolling a die will almost never be perfectly $\frac{1}{6}$ for each side. However—especially relevant given the presumption of equal probability—we can theoretically expect each outcome to have a probability of $\frac{1}{6}$, i.e., the ratio between the cardinalities of the *single-outcome* event* $E \in S$ (1) and the sample space $S = \{1, 2, 3, 4, 5, 6\}$ (6).
+
+### Simple and compound events
+Simple events—like the *single-outcome event referenced above—are, well, only 'made up' of a single outcome. Formally, simple events are events whose set of outcomes is a singleton ($|E| = 1$). Outcomes themselves can be seen as events if we're interested in examining the outcomes in and of themselves; the outcome–event distinction would only be a conceptual one in such a case.
+
+Compound events, on the other hand, can be made up of multiple outcomes. To return to the die roll example, a compound event would look something like 'rolling an odd number' or 'rolling a number smaller than three'.
