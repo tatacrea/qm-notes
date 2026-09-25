@@ -4,14 +4,23 @@ author: "kayla"
 format: typst
 ---
 
-# Lecture 2
+# Week 2
 ## Definitions
+### *and*
+The probability of $A$ and $B$ happening, also the joint probability of $A \cap B$, is computed using the following general rule: $$\Pr(A \cap B) = \Pr(A|B) \times \Pr(B) = \Pr(B|A) \times \Pr(A)$$
+
+### *or*
+The probability of $A$ or $B$ happening (which includes all of *only* $A$, *only* $B$, and *both* $A$ *and* $B$) is computed using the following general rule: $$\Pr(A \cup B) = \Pr(A) + \Pr(B) - \Pr(A \cap B)$$ where we subtract any 'overlap' between $A$ and $B$ which was double counted in adding both.
+
 ### Independence
 An event $A$ is *independent* of another event $B$ iff the probability of $A$ happening is not conditional on the probability of $B$ happening. Formally, the conditional probability of $A$ on $B$ is equal to the marginal probability of $A$, and therefore equal to the probability of $A$ on not-$B$. That is, $$\Pr(A|B) = \Pr(A| \sim B) = \Pr(A)$$ When this happens, the joint probability of $A$ and $B$ is $$\Pr(A \cap B) = \Pr(A) \times \Pr(B)$$
+
 ### Mutual exclusivity
-An event $C$ is *mutually exclusive* with another event $D$ iff neither event can occur simultaneously. Formally, $$\Pr(A \cap B) = 0 \therefore \Pr(A \cup B) = \Pr(A) + \Pr(B)$$.
+An event $C$ is *mutually exclusive* with another event $D$ iff neither event can occur simultaneously. Formally, $$\Pr(A \cap B) = 0 \therefore \Pr(A \cup B) = \Pr(A) + \Pr(B)$$
+This also means that the conditional probabilities of both events on each other $\Pr(A|B) = \Pr(B|A) = 0$.
+
 ### Collective exhaustivity
-A set of events, $E_i = \{E_1, E_2, ..., E_n\}$, is collectively exhaustive when they add up to 1. Formally, $$\sum_{i=1}^{n} E_i = 1$$
+A set of events, $E_i = \{E_1, E_2, ..., E_n\}$, is collectively exhaustive when they add up to 1. Formally, $$\Pr(\bigcup_{i = 1}^n E_i) = \sum_{i=1}^n \Pr(E_i) = 1$$
 
 ## Classical probability
 Classical probability is the study of probability in the absence of data. Therefore, definitions and concept in this paradigm are built upon relations between discrete events and cardinalities of sets. In the absence of data, we conceptualise probability as the ratio between the *cardinality of the set of outcomes in an event* and that of *the sample space*, where the sample space is the set of all possible outcomes.
