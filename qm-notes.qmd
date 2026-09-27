@@ -36,13 +36,89 @@ Simple events—like the *single-outcome event referenced above—are, well, onl
 
 Compound events, on the other hand, can be made up of multiple outcomes. To return to the die roll example, a compound event would look something like 'rolling an odd number' or 'rolling a number smaller than three'.
 
+## From specific to general
+Variables in political science are usually stochastic, where whether an outcome (an event happening/taking on a certain value) is true is 'up to chance' and its associated causal mechanisms *change the probability* of it happening.
+
+From a frequentist perspective at least, causal-statistical accounts of political phenomena can thus be viewed as 'repeated trials' on the population, where the probability of an effect (some outcome) manifests as the number of units/observations for which this is true. Observing a causal phenomenon increasing/decreasing this number, then, can be seen as some cause resulting in a higher probability of effect being true.
+
+## Random variables
+Let $Y$ be some random variable on a set of outcomes $O$. As $Y$ is a function, $$ Y : O \mapsto \{y_1, y_2, ...\}$$ where $\{y_1, y_2, ...\}$ is the **distribution** (also sample space). Within this distribution, $n_1$ and $n_2$ are **realisations** of the random variable. In addition, the **support** of this distribution is the subset of the distribution s.t. $\forall y \in$ support, $\Pr(y) > 0$. Lastly, the function which maps all the members of the distribution to their associated probabilities, $$f : \{y_1, y_2, ...\} \mapsto \{\Pr(y_1), \Pr(y_2), ...\}$$ is the **distribution *function***.
+
+$\Pr(A) = \sum_{i = 1}^n \Pr(A|B_i) \times \Pr(B_i)$
+
 ## Discrete probability distributions
 ### Bernoulli distribution
-Bernoulli distributions exclusively concern *binary variables* and can be represented as follows:
+Bernoulli distributions exclusively concern *binary variables*, describing the frequency of both potential outcomes over repeated observations. It can be represented as follows:
 
-$\Pr(Y = y|p) = \begin{cases}(1 - p \text{for} y = 0, \\ p \text{for} y = 1 \end{cases}$
+$$\Pr(Y = y|p) = \begin{cases}(1 - p) &\text{for } y = 0, \\ p & \text{for } y = 1 \end{cases}$$
 
-In the general form, $\Pr(Y = y|p) = p^y(1 - p)^{1 - y}$
+In the general form, $$\Pr(Y = y|p) = p^y(1 - p)^{1 - y}$$ The Bernoulli distribution is based on the assumption that the trials are independent, which then needs to be justified/self-evident when applying it in analysis.
 
 ### Binomial distribution
-$\Pr(Y = y|n, p) = \binom{n}{y} p^y(1 - p)^{1 - y}$
+The binomial distribution broadens the size (number of trials) of the Bernoulli distribution$\Pr(Y = y|n, p) = \binom{n}{y} p^y(1 - p)^{1 - y} = \frac{n!}{y!(n-y)!}p^y (1-p)^{1-y}$
+
+### Poisson distribution
+$\Pr(Y = y|\mu) = \frac{\mu^y}{y! \times e^\mu}$, where $\mu > 0$ is the expected value of the number of events and the variance $\sigma^2 = \mu$.
+
+This PMF describe the number of times one observes 0 events, 1 event, etc. throughout a fixed period of time. Events that can be described by a Poisson distribution are
+
+- discrete (integer count)
+- independent (just like Bernoulli), and
+- distributed with a *known mean*.
+
+### Negative binomial distribution
+$\Pr(Y = y|r,p) = \binom{y + r - 1}{y} p^y (1-p)^r$, where $y$ is the number of successes (events), $r$ is the number of failures (non-events), $y + r$ is the number of opportunities (or Bernoulli trials), and $p$ is the probability of a success. Events that can be described by a negative binomial distribution
+
+- are independent
+- have two possible outcomes (binary)
+- keep a constant probability of successes from one trial to the next
+- continue until a total of r successes (/failures) are observed, where r is fixed
+
+Negative binomial distributions allow applications to decouple the variance from the mean.
+
+## Continuous probability distributions
+
+### Normal distribution
+$$\phi (x) \equiv f(x; \mu, \sigma^2) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{1}{2 \sigma^2} (x-\mu)^2}$$
+
+### Power-transformed distribution
+$$\phi (x) \equiv f(x; \mu, \sigma^2, \lambda) = \frac{\lambda x^{\lambda - 1}}{\sqrt{2 \pi \sigma^2}} e^{-\frac{1}{2 \sigma^2} (x^\lambda - \mu)^2}$$
+
+When $\lambda < 1$, the right side of the graph is longer than than the left. When $\lambda > 1$, the left side is longer than the right. An asymmetry where one function of the graph is longer than the other is called skewness.
+
+An example of a power-transformed distribution is the log distribution
+
+$$f(x; \mu, \sigma^2) = \frac{1}{x \sqrt{2 \pi \sigma^2}} e^{-\frac{1}{2 \sigma^2} (\ln(x)-\mu)^2}$$
+
+more distributions
+- logistic
+- duration (exponential, pareto, gamma, weibull)
+
+# Week 3
+
+### Confidence intervals
+A confidence interval can be interpreted as the range in which repeated samples, over the long run, will contain the true mean with some given probability (often 95%). 
+
+## Finite sample properties of estimators
+Here, we talk about biasedness, variance, and relative efficiency. Both of these pertain to an increasingly large *number of draws*.
+
+### Unbiased
+An estimator is unbiased when the mean of the estimator distribution, given some fixed sample size, converges to the expected value of the parameter over the course of an indefinite amount of draws
+
+### Relative efficiency
+(Relative) efficiency is when, given two unbiased estimators $W_1$ and $W_2$, the more efficient estimator $W_1$ has
+
+- Variances smaller than/equal to the other's variances on all values of the parameter
+- A strictly smaller variance on at least one value of tne parameter
+
+Formally $$\forall \theta, \text{Var}(W_1) ≤ \text{Var}(W_2) \text{ and } \exists \theta : \text{Var}(W_1) < \text{Var}(W_2)$$
+
+## Asymptotic properties of estimators
+Asymptotic measures like consistency pertain to an increasingly large *sample size*.
+
+### Consistency
+
+## Hypothesis testing
+We will never know for sure the (*a posteriori*) odds of some sample statistic/estimator at hand producing an erroneous sample estimate. However, we can find out the *a priori* probability that our (interval) estimate may not contain the estimand (population parameter).
+
+Levels $\alpha$ of a statistical significance tests are simply some given probability thresholds of a Type I error occurring. Formally, $\alpha$ is the the null hypothesis being rejected given that it actually happens: $$\alpha = \Pr(\text{Reject }H_0|H_0)$$
