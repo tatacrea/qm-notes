@@ -378,25 +378,115 @@ $$
 and therefore
 $$
 \begin{array}{rl}
-\hat{\beta_j} - \beta_{jl} &= -(\hat{\beta_j} - \beta_{ju}) \\
+\hat{\beta_j} - \beta_{jl} &= -(\hat{\beta_j} - \beta_{ju}) & \text{ } (6.4)\\
 ( &= \delta \text{ })
 \end{array}
 $$
 
-Revisiting equation $(6.3)$, we verbally understand the equation as the probability that $t^*$ is larger than or equivalent to the $t$-value for some DOF at $\frac{\alpha}{2}$^[two-tailed, therefore the probability of the true population param lying outside the CI, which is what $\alpha$ essentially is, is divided equally for each of the two tails] and smaller than or equal to $t$ at $(1 - \frac{alpha}{2})$.
+Revisiting equation $(6.3)$, we verbally understand the equation as the probability that $t^*$ is larger than or equivalent to the $t$-value for some DOF at $\frac{\alpha}{2}$^[two-tailed, therefore the probability of the true population param lying outside the CI, which is what $\alpha$ essentially is, is divided equally for each of the two tails] and smaller than or equal to $t$ at $(1 - \frac{\alpha}{2})$.
 
-Revisiting equation $(6.2)$ and bringing back our expression of $\delta$ as $\pm (\hat{\beta}_j - \beta_j)$ gives us $\delta = t^* \text{SE}(\hat{\beta}_j)$, where the lower boundary is $\hat{\beta}_j + t_{(\frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)$ and the upper boundary $\hat{\beta}_j + t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)$. By symmetry, $$\hat{\beta}_j + t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j) = \hat{\beta}_j - t_{(\frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)$$ and therefore
+Revisiting equation $(6.2)$ and bringing $(6.4)$ gives us $\delta = t^* \text{SE}(\hat{\beta}_j)$, where the lower boundary is $$\beta_{jl} = \hat{\beta}_j + t_{(\frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)$$ and the upper boundary $$\beta_{ju} = \hat{\beta}_j + t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)$$ Given that $\beta_{ju} = \hat{\beta}_j + \delta = \hat{\beta}_j + t^* \text{SE}(\hat{\beta}_j)$ corresponds to the upper boundary, we can infer that $t^* = t_{(1 - \frac{\alpha}{2})}$. By symmetry, 
+
+$$
+\begin{array}{rl}
+t_{(\frac{\alpha}{2})} \text{SE} (\hat{\beta}_j) &= -\delta \\
+\hat{\beta}_j + t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j) &= \hat{\beta}_j - t_{(\frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)
+\end{array}
+$$
+and therefore
 
 $$
 \begin{array}{rll}
-\Pr(\hat{\beta}_j - t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j) \leq \beta_j \leq \hat{\beta}_j + t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)) &= 1 - \alpha &\text{ }(6.4)
+\Pr(\hat{\beta}_j - t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j) \leq \beta_j \leq \hat{\beta}_j + t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)) &= 1 - \alpha &\text{ }(6.5)
 \end{array}
 $$
 
 ## Errors, errors
+Statistical inference essentially boils down to deciding between two alternative (substantive) interpretations: either there is no ('null') effect, $H_0$, or there is an effect, $H_A$. The latter is the 'alternative' hypothesis, hence the $A$ subscript.
 
+With a 95% CI (I hope what this means is clear enough to the reader by now), $H_0$ being true implies that we falsely reject $H_0$ ('false positive') 5% of the time *in the long run*. That is, $\Pr(\text{reject} H_0|H_0) = 0.05$.
+
+### The $\alpha$-bsolutist way...
+In testing the statistical significance of a regression coefficient, we want to determine whether our estimated coefficient is non-null/non-zero, i.e., $\hat{\beta}_j \neq 0$. Therefore, we use a two-tailed hypothesis to test against $H_0$:
+
+- $H_0$: $\beta_j^* = 0$, where $*$ denotes 'test'^[See $t^*$ in the previous section]
+- $H_A$: $\beta_j^* \neq 0$
+
+Thus, we construct $t^*$ given our hypotheses about $\hat{\beta}_j$. Bringing back equation $(6.2)$ and given a baseline expectation of null (i.e., $\beta_j^* = 0$),
+
+$$
+\begin{array}{rll}
+t^* &= \frac{\hat{\beta}_j - \beta_j^*}{\text{SE}(\hat{\beta}_j)}\\
+&= \frac{\hat{\beta}_j}{\text{SE}(\hat{\beta}_j)} &\sim t_{(n - k - 1)}
+\end{array}
+$$
+
+We reject $H_0$ at the $\alpha%$ level if $|t^*| > t_{(1 - \frac{\alpha}{2}[,n - k - 1])}$.
+
+### ...and the $p$-retty nuanced way
+
+So far, we've framed statistical significance in binary terms, i.e., whether our test statistic clears some 'arbitrary' hurdle. What if different people and different venues set different hurdles? The concept of $p$-values reframes the expression of uncertainty and states it as the 'maximum height of the hurdle' which our test statistic can clear.
+
+To return to our $\alpha$ example, our hurdle is $t^* = t_{(1 - \frac{\alpha}{2}, n - k - 1)}$. When it is cleared, we are $100(1 - \alpha)%$ confident of a CI. So, what about the reverse? The probability that we misdiagnosed the situation and $|t^*|$ is actually smaller than $|t_{(n - k - 1)}|$^[Since we're not dealing with $\alpha$s here, $\frac{\alpha}{2}$ is irrelevant]?
+
+Once again, $\Pr(t^* ≥ t_{(1 - \frac{\alpha}{2}, n - k - 1)}) = 1 - \alpha$. Generalised, $$\Pr(t_{(n - k - 1)} ≤ t^*) = 1 - p$$ The $p$-value therefore takes the exact opposite scenario; neither $>$ nor $=$, but just $>$: $$\Pr(t_{(n - k - 1)} > t^*) = p$$
+
+$\Pr(t > t^*)$ denotes the area to the right of $t^*$ given $n - k - 1$ DOF. By symmetry,
+
+$$
+\begin{array}{rlll}
+p &= \Pr(|t_{(n - k - 1)}| > |t^*|) \\
+&= 2\Pr(t_{(n - k - 1)} > |t^*|)
+\end{array}
+$$
+
+The above gives us the smallest significance level at which $H_0$ can be rejected, given the resulting $t_{(n - k - 1)}^*$.
+
+## Categorical/binary variables
+'Qualitative' (nominal, sometimes ordinal) explanatory variables^[Regressing them as DVs is the topic of a future section] can be reduced to one, or a series of, binary (often called 'dummy') variables. When reducing/recoding to binary variables, it is good practice to
+
+- Code the two categories within each binary variable as 0 and 1,
+- Assign the 0 value to some baseline, and
+- Name variables after the non-baseline ('1') category.
+
+### Evading the binary variable trap
+Let's take a polytomous variable, such as 'party an individual voted for', as an example. If each category gets its own binary variable, the resulting binary variables will be perfectly collinear as they all take the value $1$. Given $k$ categories, we avoid this collinearity trap by splitting this into $k - 1$ binary variables, with the baseline category taking on the 0 value in all binary variables. Note that coefficient interpretation is always relative to the baseline category.
+
+For polytomous nominal variables, simply assign one binary variable for non-baseline category with a 1 for the *respective* category it identifies and zero for all the others. For ordinal variables, it may help to keep the 1 instead of turning it to a 0 as we go up the scale. This allows us to calculate the coefficients between levels with standard error calculation included.
 
 ## Interpreting interaction coefficients
+Let's use the following example:
+$$
+\begin{array}{rl}
+Y &= \beta_0 + \beta_1 X_1 + \beta_2 D + \beta_3 X_1 D + \epsilon \\
+\frac{\partial Y}{\partial X_1} &= \beta_1 + \beta_3 D \\
+\frac{\partial Y}{\partial D} &= \beta_2 + \beta_3 X_1
+\end{array}
+$$
+Focusing on $X_1$,
+
+- When $D = 0$, the marginal effect of $X_1$ is $\beta_1$.
+- When $D = 1$, the marginal effect of $X_1$ is $\beta_1 + \beta_3$.
+
+Focusing on the intercept,
+
+- When $D = 0$, the intercept is $beta_0$. Quite straightforward so far, however...
+- When $D = 1$, $\beta_2 D = \beta_2$ is also a constant, and the intercept is therefore $beta_0 + \beta_2$
+
+We notice two things:
+
+- The marginal effect of $X_1$ changes in value with different values of $D$
+- The marginal effect of $D$ changes the value of the intercept
+
+This constitutes the ground upon which we explore the rules to follow in interpreting interaction coefficients, as laid out by Thomas Brambor et al. (2007).
+
+### Include interaction terms
+It should be clear why: doing otherwise obscures the interaction between both variables. This This is a rather trivial point, but it bears repeating because it is perhaps fundamentally connected to the error in interpretation often seen in political science literature which came out more than two decades ago (two subheadings down).
+
+### Include all constituent terms
+A common mistake in conducting interaction regressions is to exclude e.g., the binary constituent of an interaction effect. Specifically in this context, not specifying all constituent terms forces the regression lines to share an intercept, yielding biased slope coefficients.
+
+### Do not interpret marginal coefficients as unconditional
 A common flawed practice in social science is to simply report one IV's marginal effects as its own (independent) beta-coefficient. In what follows, I mathematically elaborate why this is incorrect. Suppose an equation with two independent variables, $X$ and $Z$, which do not interact:
 
 $$
@@ -415,4 +505,24 @@ Y &= \beta_0 + \beta_1 X + \beta_2 Z + \beta_3 XZ + \epsilon \\
 \frac{\partial Y}{\partial Z} &= \beta_2 + \beta_3 X
 \end{array}
 $$
-This highlights that the marginal effect of either IV is not its beta-coefficient alone. 
+This highlights that the marginal effect of either IV is not its beta-coefficient alone.
+
+### Calculate substantively meaningful marginal effects and SEs
+
+
+Oftentimes you'll only be dealing with a binary interaction variable. Assuming such a case involving two interaction variables, and given that you're calculating marginal effects primarily from the perspective of the continuous variable, it's a straightforward task to interpret the marginal coefficients:
+
+$$
+\begin{array}{rl}
+Y &= \beta_0 + \beta_1 X_1 + \beta_2 D + \beta_3 X_1 D + \epsilon \\
+(D = 0) \text{ } Y &= \beta_0 + \beta_1 X_1 + \epsilon \\
+(D = 1) \text{ } Y &= (\beta_0 + \beta_2) + (\beta_1 + \beta_3) X_1 + \epsilon
+\end{array}
+$$
+
+Theoretically, there are only two sets of values (and four values total, the intercepts and slopes when $D = 0$ and $D = 1$, respectively) you'd need to report.
+
+Interpreting continuous interactions is trickier, but there are simple tricks (e.g., using extreme values of the interaction variable or plotting a graph of how the coefficient changes with the interaction variable). For a good example of this, see Golder (2005).
+
+Additionally, interaction estimates should be accompanied by the correct standard error calculation formula. The standard error of $X_1$'s marginal effect on $Y$, $\frac{\partial Y}{\partial X_1}$ is
+$$\hat{\sigma}_{\frac{\partial Y}{\partial X_1}} = \sqrt{\text{Var}(\hat{\beta}_1) + X_2^2 {Var}(\hat{\beta}_3) + 2X_2 \text{Cov}(\hat{\beta}_1,\hat{\beta}_3)}$$
