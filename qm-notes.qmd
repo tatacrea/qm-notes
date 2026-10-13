@@ -1,8 +1,15 @@
 ---
 title: "qm-notes"
 author: "kayla"
-format: typst
+format: 
+  typst: default
 ---
+
+```{r}
+#| include: false
+if (!require(pacman)) install.packages("pacman")
+p_load(tidyverse, ggplot2, modelsummary)
+```
 
 # Week 2
 ## Definitions
@@ -86,18 +93,30 @@ $$\phi (x) \equiv f(x; \mu, \sigma^2, \lambda) = \frac{\lambda x^{\lambda - 1}}{
 
 When $\lambda < 1$, the right side of the graph is longer than than the left. When $\lambda > 1$, the left side is longer than the right. An asymmetry where one function of the graph is longer than the other is called skewness.
 
-An example of a power-transformed distribution is the log distribution
-
-$$f(x; \mu, \sigma^2) = \frac{1}{x \sqrt{2 \pi \sigma^2}} e^{-\frac{1}{2 \sigma^2} (\ln(x)-\mu)^2}$$
+An example of a power-transformed distribution is the log distribution, $$f(x; \mu, \sigma^2) = \frac{1}{x \sqrt{2 \pi \sigma^2}} e^{-\frac{1}{2 \sigma^2} (\ln(x)-\mu)^2}$$
 
 more distributions
 - logistic
 - duration (exponential, pareto, gamma, weibull)
 
 # Week 3
+## Estimands, estimates, estimators...
+A random sample, $\{Y_1, Y_2, ..., Y_n\}$, is a set of random 'variables'. It is a proper subset of the population where each member of the population has an equal probability of being selected. When you calculate a sample statistic, the statistical *function* is applied on the observed sample (the input). This function is called an *estimator* and its output an *estimate*. Formally, an estimator is a function $$f : \{Y_1, Y_2, ..., Y_n\} \mapsto \mathbb{R}$$ where the estimates are a subset of the set of real values, $\mathbb{R}$.
+
+In a (hypothetical) indefinite repeated-samples scenario, threre will be variation in the mean on account of not every sample containing the exact same members $Y_i$. An estimate from a sample will not be identical to the poulation value, with the difference being the *sampling error*. Graphing these samples along the values it takes also gives us an indicator of the *sampling variability*.
+
+To formalise our expression of uncertainty about our estimates, we use the standard error. Using prior knowledge of sampling variability on repeated samples as a starting point, we can expect that our different estimates across different repeated samples yields a probability distribution of all the different estimates, known as the *sampling distribution*. Calculating the spread of this distribution then gives us the *standard error*.
+
+**Important**: Note that our usage of the term 'variable' here differs from that which is found in lay statistical usage. While $Y$ is some random variable across all members of the population, $Y_i$ is the function localised to each observation $i$. Thus, the term 'variable' here is more analogous to an observation.
 
 ### Confidence intervals
 A confidence interval can be interpreted as the range in which repeated samples, over the long run, will contain the true mean with some given probability (often 95%). 
+
+**Important**: A 95% confidence interval does not mean that there is a 95% probability for the population parameter to lie inside some *specific* confidence interval, $[y - m, y + m]$. Rather, it pertains to the *a priori generalised CI function* $[Y - 1.96 \sqrt{n}, Y + 1.96 \sqrt{n}] \text{ } \forall n$ prior to the value $y$ being specified. That is, before the sample is drawn, we have 95% confidence that the sample we draw contains the population mean $\mu$. Once the value has been decided and the samples taken, the CI either contains the (unknown) population parameter or it doesn't, with no way to tell for sure - though of course, we can be less or more confident about it.
+
+It is also possible to reframe this 'prospecting' confidence in retrospect: if we repeat the procedure indefinite times, the CIs we come up with, regardless of the exact sample estimates, will contain the sample mean 95% (or more generally, $100(1 - \alpha)\%$) of the time. The more samples we take, the more convergent to 95% it gets.
+
+However, this estimation has another pitfall: it assumes that we know the population's standard deviation $\sigma$. Oftentimes, we cannot, and what we have is instead the estimate $\bar{s}$. Since we cannot use this, we have to relax our assumption of normality and use the $t$ distribution instead.
 
 ## Finite sample properties of estimators
 Here, we talk about biasedness, variance, and relative efficiency. Both of these pertain to an increasingly large *number of draws*.
@@ -122,3 +141,278 @@ Asymptotic measures like consistency pertain to an increasingly large *sample si
 We will never know for sure the (*a posteriori*) odds of some sample statistic/estimator at hand producing an erroneous sample estimate. However, we can find out the *a priori* probability that our (interval) estimate may not contain the estimand (population parameter).
 
 Levels $\alpha$ of a statistical significance tests are simply some given probability thresholds of a Type I error occurring. Formally, $\alpha$ is the the null hypothesis being rejected given that it actually happens: $$\alpha = \Pr(\text{Reject }H_0|H_0)$$
+
+## Approaches to assessing uncertainty
+### Analytic method
+This approach presumes a normal distribution
+
+### Simulation
+This approach also presumes a normal distribution
+
+The following instruction is specific to estimating uncertainty of differences in means.
+
+In programming terms,
+
+- One first creates SE values for each group. Here, it may be a good exercise to see how differences in the number of data points translates to differences in how wide/narrow the SE ranges are. 
+
+### Bootstrapping
+- First, pull all the data points by the grouping variable/s of interest.
+- Then, create the actual simulations of sampling by creating a tibble using `expand_grid()`. Here, the number of rows being defined by the number of bootstrap simulations to be conducted, and the number of columns is the sample size.
+- Afterwards, group the *tibble* data by row (by each bootstrap simulation).
+- Lastly, summarise the mean *including* the argument `replace = TRUE`.
+
+# Week 4
+## Basic intuition
+Assume a two-dimensional scatterplot for which we assume a linear relationship between the two variables. The entire set of all the points, $(X_i, Y_i)$, in the scatterplot of dependent variable $Y$ against explanatory variable $X$ has both a set of $x$-values, $x_i$, and $y$-values, $y_i$. These values therefore have a mean along both the x-axis, $\bar{X} = \bar{x}$, and the y-axis $\bar{Y} = \bar{y}$. Given that we expect most (if not all!) data points to be offset from $\bar{X}$ and $\bar{Y}$ (and therefore, their respective values offset from $\bar{x}$ and $\bar{y}$)^[This concerns an ultimately technical distinction, but given the importance of separating concepts from their values, I decided to go through the trouble of writing this out.], we expect to see a difference between the point values and the mean value, $y_i - \bar{y}$.
+
+Some of this deviation is going to be explained by the line, which gives us the predicted values $\hat{x}, \hat{y} \text{ } \forall x \in X$, but social science data is (at least overwhelmingly) not perfectly linear. Therefore, we additionally expect residuals, $\epsilon_i$, as the deviations from the mean that are unexplained by the line, i.e., $y_i - \hat{y}$. Given the linear regression formula 
+
+$$
+\begin{array}{rl}
+\hat{y} &= \beta_0 + \beta_1 \hat{x}\\
+\end{array}
+$$
+
+we can re-formulate $E_i$ as
+$$
+\begin{array}{rl}
+\epsilon_i &= y_i - \hat{y}\\
+  &= y_i - (\beta_0 + \beta_1 \hat{x})
+\end{array}
+$$
+
+Going forward, it is important to remember that the sum of residuals equals zero. Why is the sum of residuals $\epsilon_i = \sum (y_i - \bar{y}) = 0$, as well as the sum of x-axis deviations from the mean $\sum (x_i - \bar{x}) = 0$?
+
+Let $m_i$ be a series of values $m_1, m_2, ..., m_n$. Let its mean be $\bar{m} = \frac{1}{n} \sum_{i=1}^n (m_i)$. Therefore, $m_i = \bar{m} + (m_i - \bar{m})$, the latter of which we can abstract away as $\delta_i = m_i - \bar{m}$. This means that
+
+$$
+  \begin{array}{rl}
+    \bar{m}               & = \frac{1}{n} \sum_{i=1}^n (\bar{m} + \delta_i) \\
+                          & = \frac{1}{n} (\sum_{i=1}^n \bar{m} + \sum_{i=1}^n \delta_i)\\
+    n \bar{m}             & = \sum_{i=1}^n \bar{m} + \sum_{i=1}^n \delta_i\\
+                          & = n \bar{m} + \sum_{i=1}^n \delta_i\\
+    \sum_{i=1}^n \delta_i & = n \bar{m} - n \bar{m} \\
+                          & = 0
+  \end{array}
+$$
+Let either $m_i = x_i$ and $\delta_i = x_i - \bar{x}$ or $m_i = y_i$ and $\delta_i = y_i - \bar{y}$. Therefore $$
+\begin{array}{rl}
+\sum_{i=1}^n (x_i - \bar{x}) = \sum_{i=1}^n (y_i - \bar{y}) = 0 & (4.1)
+\end{array}
+$$
+
+This finding motivates us to operationalise 'minimum residuals' differently than simply adding up their values. The standard method of doing this is by squaring them. We do this for three reasons:
+
+1. We remove the cancelling effect of negative-sign residuals (common to techniques like LAV)
+2. We penalise outliers more in calculating the line of best fit (specific to power transformation)
+3. It is more mathematically tractable, allowing partial derivation to obtain coefficient values
+
+## Linear regression
+The above minimisation problem can be formulated as $$\min\limits_{\hat{\beta}_0, \hat{\beta}_1} \sum_{i = 1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2$$
+
+Given that we have the entire term squared, we can (partially) differentiate to find out the first-order conditions given a change on *either* $\hat{\beta}_0$ or $\hat{\beta}_1$.
+
+$$
+  \begin{array}{rll}
+    \frac{\partial}{\partial \hat{\beta}_0} \sum_{i = 1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2 &= \sum_{i = 1}^{n} 2(Y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)(-1) & \text{by chain rule}\\
+    &= -2 \sum_{i = 1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i) & \stackrel{!}{=} 0\\
+    \sum_{i = 1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i) &= 0 & \\
+    \sum_{i = 1}^{n} y_i - n\hat{\beta}_0 - \sum_{i = 1}^{n} \hat{\beta}_1 x_i &= 0 & \\
+    \sum_{i = 1}^{n} y_i - \hat{\beta}_1 \sum_{i = 1}^{n} x_i &= n\hat{\beta}_0 & \\
+    \hat{\beta}_0 &= \frac{1}{n}\sum_{i = 1}^{n} y_i - \hat{\beta}_1 (\frac{1}{n} \sum_{i = 1}^{n} x_i)\\
+    &= \bar{y} - \hat{\beta}_1 \bar{x} & (4.2)
+  \end{array}
+$$
+Given this formulation of $\hat{\beta}_0$, any OLS estimator thus passes through both the $x$-axis and $y$-axis mean values. Now, to find $\hat{\beta}_1$, repeat the FOC differentiation but on $\hat{\beta}_1$
+
+$$
+  \begin{array}{rll}
+    \frac{\partial}{\partial \hat{\beta}_1} \sum_{i = 1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2 &= \sum_{i = 1}^{n} 2(Y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)(-x_i) & \text{by chain rule}\\
+    &= -2 \sum_{i = 1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)(x_i) & \stackrel{!}{=} 0\\
+    \sum_{i = 1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)(x_i) &= 0 & \\
+    \sum_{i = 1}^{n} (y_i - (\bar{y} - \hat{\beta}_1 \bar{x}) - \hat{\beta}_1 x_i)(x_i) &= 0 & \mbox{sub in (4.2)} \\
+    \sum_{i = 1}^{n} (y_i - \bar{y} + \hat{\beta}_1 \bar{x} - \hat{\beta}_1 x_i)(x_i) &= 0 & \\
+    \sum_{i = 1}^{n} (y_i - \bar{y} - \hat{\beta}_1 x_i + \hat{\beta}_1 \bar{x})(x_i) &= 0 & \\
+    \sum_{i = 1}^{n} ((y_i - \bar{y}) - \hat{\beta}_1(x_i - \bar{x}))(x_i) &= 0 & \\
+    \sum_{i = 1}^{n} (y_i - \bar{y})(x_i) - \hat{\beta}_1 \sum_{i = 1}^{n} (x_i - \bar{x})(x_i) &= 0 & \\
+    \hat{\beta}_1 \sum_{i = 1}^{n} (x_i - \bar{x})(x_i) &= \sum_{i = 1}^{n} (y_i - \bar{y})(x_i) & \\
+    \hat{\beta}_1 \sum_{i = 1}^{n} (x_i - \bar{x})(\bar{x} + x_i - \bar{x}) &= \sum_{i = 1}^{n} (y_i - \bar{y})(\bar{x} + x_i - \bar{x}) & \\
+    \hat{\beta}_1 \sum_{i = 1}^{n} (x_i - \bar{x})(\bar{x}) + \hat{\beta}_1 \sum_{i = 1}^{n} (x_i - \bar{x})(x_i - \bar{x}) &= \sum_{i = 1}^{n} (y_i - \bar{y})(\bar{x}) + \sum_{i = 1}^{n} (y_i - \bar{y})(x_i - \bar{x}) & \\
+    \bar{x} \hat{\beta}_1 \sum_{i = 1}^{n} (x_i - \bar{x}) + \hat{\beta}_1 \sum_{i = 1}^{n} (x_i - \bar{x})(x_i - \bar{x}) &= \bar{x} \sum_{i = 1}^{n} (y_i - \bar{y}) + \sum_{i = 1}^{n} (y_i - \bar{y})(x_i - \bar{x}) & \\
+    \hat{\beta}_1 \sum_{i = 1}^{n} (x_i - \bar{x})(x_i - \bar{x}) &= \sum_{i = 1}^{n} (y_i - \bar{y})(x_i - \bar{x}) & \mbox{sub in (4.1)}\\
+    \hat{\beta}_1 &= \frac{\sum_{i = 1}^{n} (y_i - \bar{y})(x_i - \bar{x})}{\sum_{i = 1}^{n} (x_i - \bar{x})(x_i - \bar{x})} & (4.3)\\
+    &= \frac{\text{Cov}(x,y)}{\text{Var}(x)}
+\end{array}
+$$
+
+$$\beta_1 = \frac{\text{Cov}(x,y)}{\text{Var}(x)} = \frac{\sum_{i = 1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i = 1}^n (x_i - \bar{x})^2}$$
+
+The slope coefficient, $\hat{\beta}_1$ represents the *marginal coefficient*
+
+## Goodness of fit
+TSS = ESS + RSS
+
+ESS is $(\hat{Y} - \bar{Y})$ and RSS is $(Y_i - \hat{Y})$
+
+## Assumptions
+### A1. Linearity
+The coefficients should be linear. This is self-explanatory and violation of linearity implies, at minimum, violation of A2.
+
+### A2. Zero conditional mean
+The expected value of the standard error of $i$, given some $X$, is 0: $$(\epsilon_i | X) = 0$$
+
+This implies that the error terms should not be correlated with the independent variable. We will cover two potential scenarios involving violation of this assumption. The first is when the slope is misidentified (and therefore the marginal effect biased):
+
+```{r}
+#| echo: false
+a2_violation_1 <- tibble(
+  x = seq(0, 10, by = 1),
+  y = seq(0, 10, by = 1),
+  yfake = seq(2.5, 7.5, by = 0.5),
+  resid = y - yfake,
+  noresid = y - y
+)
+a2_1_plot <- a2_violation_1 |>
+  ggplot(aes(x)) +
+  geom_point(aes(y = y)) +
+  geom_line(aes(y = yfake)) +
+  geom_segment(
+    aes(
+      xend = x,
+      y = y,
+      yend = yfake
+    )
+  )
+a2_1_plot
+```
+Regressing the residuals in the graph above against Y gives us a (statistically significant) correlation, when we expect none or a non-significant one:
+```{r}
+#| label: examine_correlation
+#| echo: false
+#| warning: false
+resid_x_a2 <- lm(resid ~ x, data = a2_violation_1)
+modelsummary(
+  resid_x_a2,
+  output    = "tinytable",
+  coef_map  = c(
+    "(Intercept)" = "Intercept",
+    "x"         = "X-value"
+  ),
+  statistic = NULL,
+  stars     = FALSE,
+  gof_map   = c("nobs", "r.squared"),
+  fmt       = 3
+)
+```
+
+The second is when relationship is not linear (which also means A1 is violated).
+
+### A3. Constant variance (homoscedasticity)
+The variance should remain constant regardless of $X$ $$\text{Var}(\epsilon_i | X) = \sigma^2$$
+
+### A4. Uncorrelated errors
+A violation of the uncorrelated errors assumption means that the estimated standard errors are wider than 
+
+Broadly speaking, there are three types of violation here. The first involves positively correlated errors:
+
+### A5.
+The error terms are distributed normally
+
+# Week 5
+
+
+# Week 6
+## Confidence intervals
+### What are confidence intervals?
+
+Confidence intervals (CIs) are an expression of uncertainty about some estimate's precision, constructed such that the true population mean will be between an analytically calculated (class of) interval(s) some high percentage of the time, usually 95%. The level of 'error' (that is, the probability that the population mean is outside of this class of ranges) is called the 'significance level', $\alpha \in (0, 1)$. 
+
+Now to the construction of the confidence interval itself: let some $\alpha$ and let $\delta$ be a (+)ve number. The CI around some marginal effect $\beta_j$ is defined as 
+$$
+\begin{array}{rll}
+\Pr(\hat{\beta}_j - \delta \leq \beta_j \leq \hat{\beta}_j + \delta) &= 1 - \alpha & \text{ }(6.1)
+\end{array}
+$$ 
+That is, the probability that the true population mean is between (the estimate ± $\delta$) equals one minus the significance level.
+
+### A remark on CI interpretations
+
+Let $\hat{\beta}_j$ have some sign, whether it be $(+)$ or $(-)$. If the CI doesn't include the zero point, we accept some 'possibility of variation' (i.e., imprecision) in the *value* of the actual population parameter, but we are $(1 - \alpha)%$ confidence *a priori* that the population parameter agrees with our *interval estimate*^[To reiterate, this means that in the long run, $(1 - \alpha)%$ of all *repeated trials* will contain the population interval given this CI *specification*.], and perhaps slightly more so in terms of the sign. Ergo, one can say that they qualitatively agree, although to some this might not be sufficient^[Whether this is a sufficient criterion for qualitative agreement, or whether the absolute values of the estimates themselves actually matter, is for sound judgment to decide. Even then, sound judgment should still be deployed to determine whether the possible values in the confidence intervals represent wide enough of a 'span' to change its associated substantive conclusions.].
+
+If a CI does include the zero, however, then it is a sufficient (albeit not *always* necessary^[See preceeding footnote]) condition for qualitative disagreement. The CI including the zero point means that we have an *a priori* epectation that there is a non-negligible^[Whether some level of significance, often 5%, constitutes a negligible percentage is a well-worn debate topic, though I certainly don't think it can ever be 'too worn'] probability of the coefficient/marginal effect being either
+
++ null, or
++ having the opposite effect to the one expected.
+
+### The two ways to calculating CIs
+One way to calculate CIs is to presume known population variance (ergo, also the coefficient SEs) and assume a normal sampling distribution. We thus construct our CIs with $\delta \approx 1.96 SE(\beta_j)$. This is also generally applicable whenever we have $n > 120 + k + 1$ observations ($n - k - 1 > 120$ DOF), with $k$ being the number of explanatory variables.
+
+However, we don't always have large enough samples - or perhaps, we have 'too many explanatory variables'. We can relax this assumption of known population variance and instead use a different (non-normal) distribution, the $t$ distribution. This is given as 
+$$
+\begin{array}{rll}
+t^* &= \frac{\hat{\beta}_j - \beta_j}{\text{SE}(\hat{\beta}_j)} &(6.2)\\
+&= \frac{\hat{\beta}_j - \beta_j}{\sqrt{\frac{\hat{\sigma}^2}{\sum_{i = 1}^n (x_{ji} - \bar{x})^2}}} &\sim t_{(n - k - 1)}
+\end{array}
+$$
+with the SE recalculated to utilise the estimated variance, causing the test statistic to no longer be normally distributed. The $t$ distribution depends on the DOF in such a way that it is similar enough to the normal distribution with a high enough DOF (usually, more observations) for the normal distribution to be usable. We now have the CI 
+$$
+\begin{array}{rl}
+\Pr(t_{(\frac{\alpha}{2})} \leq t^* \leq t_{(1 - \frac{\alpha}{2})}) &= 1 - \alpha &\text{ }(6.3)
+\end{array}
+$$
+
+Recall equation $(6.1)$. In words, we understand this as $1 - \alpha$ being the probability that the true population parameter is between $\text{estimate} - \delta$ and $\text{estimate} + \delta$. Therefore, the boundary values of the CI signify $\beta_j = \hat{\beta_j} - \delta$ and $\beta_j = \hat{\beta_j} + \delta$ respectively. Therefore, the $\delta$ value at the lower bound is
+
+$$
+\begin{array}{rl}
+\delta &= \hat{\beta_j} - \beta_{jl}
+\end{array}
+$$
+and the $\delta$ at the upper bound is
+$$
+\begin{array}{rll}
+\delta &= \beta_{ju} - \hat{\beta_j} \\
+       &= -(\hat{\beta_j} - \beta_{ju})
+\end{array}
+$$
+and therefore
+$$
+\begin{array}{rl}
+\hat{\beta_j} - \beta_{jl} &= -(\hat{\beta_j} - \beta_{ju}) \\
+( &= \delta \text{ })
+\end{array}
+$$
+
+Revisiting equation $(6.3)$, we verbally understand the equation as the probability that $t^*$ is larger than or equivalent to the $t$-value for some DOF at $\frac{\alpha}{2}$^[two-tailed, therefore the probability of the true population param lying outside the CI, which is what $\alpha$ essentially is, is divided equally for each of the two tails] and smaller than or equal to $t$ at $(1 - \frac{alpha}{2})$.
+
+Revisiting equation $(6.2)$ and bringing back our expression of $\delta$ as $\pm (\hat{\beta}_j - \beta_j)$ gives us $\delta = t^* \text{SE}(\hat{\beta}_j)$, where the lower boundary is $\hat{\beta}_j + t_{(\frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)$ and the upper boundary $\hat{\beta}_j + t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)$. By symmetry, $$\hat{\beta}_j + t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j) = \hat{\beta}_j - t_{(\frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)$$ and therefore
+
+$$
+\begin{array}{rll}
+\Pr(\hat{\beta}_j - t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j) \leq \beta_j \leq \hat{\beta}_j + t_{(1 - \frac{\alpha}{2})} \text{SE} (\hat{\beta}_j)) &= 1 - \alpha &\text{ }(6.4)
+\end{array}
+$$
+
+## Errors, errors
+
+
+## Interpreting interaction coefficients
+A common flawed practice in social science is to simply report one IV's marginal effects as its own (independent) beta-coefficient. In what follows, I mathematically elaborate why this is incorrect. Suppose an equation with two independent variables, $X$ and $Z$, which do not interact:
+
+$$
+\begin{array}{rl}
+Y &= \omega_0 + \omega_1 X + \omega_2 Z + \mu \\
+\frac{\partial Y}{\partial X} &= \omega_1
+\end{array}
+$$
+
+When X and Z do not interact, reporting beta coefficients independently is not a problem. Now let's assume they do and add an interaction term:
+
+$$
+\begin{array}{rl}
+Y &= \beta_0 + \beta_1 X + \beta_2 Z + \beta_3 XZ + \epsilon \\
+\frac{\partial Y}{\partial X} &= \beta_1 + \beta_3 Z \\
+\frac{\partial Y}{\partial Z} &= \beta_2 + \beta_3 X
+\end{array}
+$$
+This highlights that the marginal effect of either IV is not its beta-coefficient alone. 
