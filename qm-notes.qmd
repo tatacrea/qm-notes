@@ -9,6 +9,7 @@ format:
 #| include: false
 if (!require(pacman)) install.packages("pacman")
 p_load(tidyverse, ggplot2, modelsummary)
+set.seed(483)
 ```
 
 # Week 2
@@ -100,10 +101,30 @@ more distributions
 - duration (exponential, pareto, gamma, weibull)
 
 # Week 3
+## Definitions
+- Estimand: the quantity of interest we seek to know about some *population*
+- Parameter: the formalised form of an estimand, usually taking a fixed value
+- Estimator: a function that takes a sample as input and outputs an estimate
+- Estimate: the parameter of a sample as an approximation of an estimand
+- Sampling variability: the 'deviation' of sampling means relative to one another
+  - Implication: If it isn't zero, then there is (non-zero) sampling variation
+- Sampling error: the deviation of a sampling mean relative to the (true) population mean
+  - Implication: If it isn't zero, then the sample's point estimates are biased
+
+## On the enterprise of sampling
+Sampling is fundamentally about trying to square a circle, with the square being the endeavour to seek out some quantifiable truth about a population and the circle being constraints to how much of the population we can feasibly reach out to. It means that we're fundamentally aspiring towards an impossibility, although it's still worth doing because the imperfect results ('estimates') we get out of it are still *useful* (a common theme in statistic analysis!)
+
+Especially with things like voting, there is a fundamental/stochastic uncertainty because the variables of interest are 'random', not just between subjects but also within subjects across e.g., time. Therefore, even if we could 'sample' everyone (at which point it is no longer a sample), we cannot be uncertain about our estimate given the looming possibility of temporal changes. Besides, taking a snapshot of *everyone at the same time* is categorically not possible.
+
+But of course we are usually only able to sample a small proportion of the population. That introduces a systematic component of uncertainty to our estimates: any sample is both 'different' from other samples and different (i.e., deviant) from the population.
+
+- Asymptotic
+- Finite-samples
+
 ## Estimands, estimates, estimators...
 A random sample, $\{Y_1, Y_2, ..., Y_n\}$, is a set of random 'variables'. It is a proper subset of the population where each member of the population has an equal probability of being selected. When you calculate a sample statistic, the statistical *function* is applied on the observed sample (the input). This function is called an *estimator* and its output an *estimate*. Formally, an estimator is a function $$f : \{Y_1, Y_2, ..., Y_n\} \mapsto \mathbb{R}$$ where the estimates are a subset of the set of real values, $\mathbb{R}$.
 
-In a (hypothetical) indefinite repeated-samples scenario, threre will be variation in the mean on account of not every sample containing the exact same members $Y_i$. An estimate from a sample will not be identical to the poulation value, with the difference being the *sampling error*. Graphing these samples along the values it takes also gives us an indicator of the *sampling variability*.
+In a (hypothetical) indefinite repeated-samples scenario, there will be variation in the mean on account of not every sample containing the exact same members $Y_i$. An estimate from a sample will not be identical to the population value, with the difference being the *sampling error*. Graphing these samples along the values it takes also gives us an indicator of the *sampling variability*.
 
 To formalise our expression of uncertainty about our estimates, we use the standard error. Using prior knowledge of sampling variability on repeated samples as a starting point, we can expect that our different estimates across different repeated samples yields a probability distribution of all the different estimates, known as the *sampling distribution*. Calculating the spread of this distribution then gives us the *standard error*.
 
@@ -119,10 +140,10 @@ It is also possible to reframe this 'prospecting' confidence in retrospect: if w
 However, this estimation has another pitfall: it assumes that we know the population's standard deviation $\sigma$. Oftentimes, we cannot, and what we have is instead the estimate $\bar{s}$. Since we cannot use this, we have to relax our assumption of normality and use the $t$ distribution instead.
 
 ## Finite sample properties of estimators
-Here, we talk about biasedness, variance, and relative efficiency. Both of these pertain to an increasingly large *number of draws*.
+Here, we talk about biasedness, variance, and relative efficiency. Both of these pertain to an increasingly large number of *draws/trials*.
 
 ### Unbiased
-An estimator is unbiased when the mean of the estimator distribution, given some fixed sample size, converges to the expected value of the parameter over the course of an indefinite amount of draws
+An estimator is unbiased when the mean of the estimator distribution, given some fixed sample size, converges to the expected value of the parameter over the course of an indefinite amount of draws. Formally, $$E[W(\theta)] - W(\theta) = 0$$
 
 ### Relative efficiency
 (Relative) efficiency is when, given two unbiased estimators $W_1$ and $W_2$, the more efficient estimator $W_1$ has
@@ -136,30 +157,63 @@ Formally $$\forall \theta, \text{Var}(W_1) ≤ \text{Var}(W_2) \text{ and } \exi
 Asymptotic measures like consistency pertain to an increasingly large *sample size*.
 
 ### Consistency
+Consistency is the property of an estimator producing increasingly accurate estimates as the sample size increases. That is, $$\lim\limits_{n \rightarrow \infty} E[W(\theta)] = W(\theta)$$
 
 ## Hypothesis testing
 We will never know for sure the (*a posteriori*) odds of some sample statistic/estimator at hand producing an erroneous sample estimate. However, we can find out the *a priori* probability that our (interval) estimate may not contain the estimand (population parameter).
 
-Levels $\alpha$ of a statistical significance tests are simply some given probability thresholds of a Type I error occurring. Formally, $\alpha$ is the the null hypothesis being rejected given that it actually happens: $$\alpha = \Pr(\text{Reject }H_0|H_0)$$
+Levels $\alpha$ of a statistical significance tests are simply some given probability thresholds of a Type I error occurring. Formally, $\alpha$ is the the null hypothesis being rejected given that it actually happens: $$\alpha = \Pr(\text{reject }H_0|H_0)$$
+
+### Extra notes on hypothesis testing
+At the end of the day, probability is (a formalisation of) expectation and uncertainty. When we're 95% confident of 'some result', we implicitly mean that we 'expect it to be a lot more likely' and assign only 5% to the possibility that it doesn't pan out. In frequentist statistics, this translates to an extension of the coin flip paradigm: if the phenomenon behind this 'some result' were to be repeated infinite times, we would see it occurring 95% of the time and not occurring 5% of the time.
+
+In hypothesis testing, confidence (1 - significance) levels indicate the likelihood that there is indeed a 'result' under the hood (pertaining to the population) when our sample gives us a result. We are therefore $x\%$ (oftentimes $95\%$) confident about a (*retrospective*,) conditional event. That is, we're $x\%$ confident of some underlying process being present in the population given that we observe it in a sample. That means that its complement, the $(1 - x)\%$, refers to the underlying process *not* being present given that we observe it (which we already did, so 'not observing some phenomenon in the sample' is irrelevant).
+
+The probability of the phenomenon being true for a population given that we observed the phenomenon in a sample is equivalent to the probability of $H_0$ being false given that $H_0$ is rejected, $\Pr(\neg H_0 | \text{reject} H_0)$. Conversely, the complement is equivalent to the probability of $H_0$ being *true* given that $H_0$ is rejected, $\Pr(H_0 | \text{reject} H_0)$.
 
 ## Approaches to assessing uncertainty
 ### Analytic method
-This approach presumes a normal distribution
+This approach presumes a normal distribution and calculates confidence intervals in 'closed form', i.e., exclusively by manipulating known parameters mathematically. Statistical software calculates analytic estimates using the $t$ distribution by default. This means that the analytic method works even for smaller samples, *provided that the normality assumption still holds*.
 
 ### Simulation
-This approach also presumes a normal distribution
+This approach also presumes a normal distribution. However, unlike the analytic method, it generates multiple 'new' samples from scratch (i.e., it takes draws from the distribution) using the distribution parameters of existing sample data.
+
+This approach makes tangible the frequentist idea of 'finite samples' while keeping computational power requirements low.
+
+Importantly, this process only 'preserves' data if we can argue that the underlying DGP yields a normally distributed random variable. When that assumption is violated, we incur virtually total data loss and are left with mere estimates/CIs for the normal distribution, rather than the data itself.
 
 The following instruction is specific to estimating uncertainty of differences in means.
 
 In programming terms,
 
-- One first creates SE values for each group. Here, it may be a good exercise to see how differences in the number of data points translates to differences in how wide/narrow the SE ranges are. 
+- Start by creating SE values for each group. Here, it may be a good exercise to see how differences in the number of data points translates to differences in how wide/narrow the SE ranges are.
+- Then, generate simulations of the sample, usually in the form of a tibble
+  - Define the number of simulations, $n$, to run
+  - Then, retrieve $n$ draws from the normal distribution $X \sim \mathcal{N}(\hat{\theta}, \text{SE}^2)$
 
 ### Bootstrapping
+The bootstrapping approach to uncertainty estimation uses resampling *with replacement* to generate a sampling distribution of the estimates. This utilises and extends information provided in the sample to create a sampling distribution of the parameter, rather than relying on an exogenous assumption (e.g., normality) which may or may not be true.
+
+The mechanics of resampling with replacement means that it works well with small-$n$ and non-normal distributions, making it the best method of the three. Bootstrapping's only real deficit is its computational power requirements. With current computing standards, it is essentially no longer a problem. Thus, bootstrapping is the go-to method for every form of parametric/non-analytic inference.
+
+Bootstrappping consists of the following steps: 
+
 - First, pull all the data points by the grouping variable/s of interest.
 - Then, create the actual simulations of sampling by creating a tibble using `expand_grid()`. Here, the number of rows being defined by the number of bootstrap simulations to be conducted, and the number of columns is the sample size.
 - Afterwards, group the *tibble* data by row (by each bootstrap simulation).
 - Lastly, summarise the mean *including* the argument `replace = TRUE`.
+
+
+## Misc
+- Sometimes, reflecting on the DGP is important in order to grasp 'oddities' in our data.
+  - e.g., when we are confident that our DGP is random enough for a normal distribution but it doesn't look normal
+  - It could well be the fact that the numbers were rounded and the range so narrow that the resulting data loss compressed the distribution into a janky shape (e.g., polls)
+- When you write equation code, write it in mathematical form first
+- Central limit theorem
+- Our theoretical assumption is IID -> every sample drawn from distribution is drawn in the same way (every time we draw a sample, it has to happen in a way where we cannot tell whether we're drawing a sample for the first or tenth time)
+  - For practical reasons this is violated in survey sampling (since it's pointless surveying someone again)
+  - But fundamentally, this is what is going on in bootstrapping (sampling with replacement is a necessary consequence of i.i.d.)
+- Interpreting CIs: e.g., I'm ($x\%$) confident that the assumption holds, and the assumption is unlikely to be violated
 
 # Week 4
 ## Basic intuition
@@ -250,9 +304,33 @@ $$\beta_1 = \frac{\text{Cov}(x,y)}{\text{Var}(x)} = \frac{\sum_{i = 1}^n (x_i - 
 The slope coefficient, $\hat{\beta}_1$ represents the *marginal coefficient*
 
 ## Goodness of fit
+Goodness of fit is how well the model captures variance in the data (i.e., how close the explained sum of squares/ESS gets to the total sum of squares/TSS). 
+
 TSS = ESS + RSS
 
-ESS is $(\hat{Y} - \bar{Y})$ and RSS is $(Y_i - \hat{Y})$
+ESS is $(\hat{Y} - \bar{Y})$ and RSS is $(Y_i - \hat{Y})$.
+
+$R^2$ is a measure of how well the model at hand captures variation between the two variables of interest. It is operationalised as the ratio between the explained and total sum-squares (ESS divided by TSS), $$R^2 = \frac{\hat{Y} - \bar{Y}}{Y_i - \bar{Y}}$$
+
+Given that ESS = TSS - RSS, we can alternatively formulate this as 1 - (RSS/TSS), i.e., $$R^2 = 1 - \frac{Y_i - \hat{Y}}{Y_i - \bar{Y}}$$
+
+### Adjusted $R^2$
+
+Formally, the adjusted $R^2$ is given as 
+$$
+\begin{array}{lr}
+\text{adj.} R^2 &= 1 - (1 - R^2)(\frac{n - 1}{n - k - 1}) \\
+&= (1 - R^2)(\frac{n - 1}{n - (k + 1)})
+\end{array}
+$$
+
+Here, we see the following things happening:
+
+- The sample size minus one is divided by the degrees of freedom, with $(k + 1)$ representing the number of parameters ($k$ IVs and the intercept)
+- Given $k$ is strictly positive in a regression context, $n - k - 1 < n - 1$
+- This means that $\frac{n - 1}{n - k - 1} > 1$
+- Multiplying $1 - R^2$ by $\frac{n - 1}{n - k - 1}$ therefore inflates its value, decreasing the value of the overall expression
+- We therefore get a smaller $R^2$ value that decreases with more IVs, ceteris paribus
 
 ## Assumptions
 ### A1. Linearity
@@ -285,7 +363,9 @@ a2_1_plot <- a2_violation_1 |>
   )
 a2_1_plot
 ```
+
 Regressing the residuals in the graph above against Y gives us a (statistically significant) correlation, when we expect none or a non-significant one:
+
 ```{r}
 #| label: examine_correlation
 #| echo: false
@@ -305,21 +385,124 @@ modelsummary(
 )
 ```
 
-The second is when relationship is not linear (which also means A1 is violated).
+The second is when relationship is not linear (which also means A1 is violated):
+
+```{r}
+#| echo: false
+#| message: false
+a2_violation_2 <- tibble(
+  e = rnorm(100, 0, 40),
+  x = rnorm(100, 5, 2),
+  y = x^3 + e
+)
+
+a2_2_plot <- a2_violation_2 |>
+  ggplot(aes(x, y)) +
+  geom_point() +
+  geom_smooth(
+    method = lm,
+    se = F
+  )
+a2_2_plot
+```
 
 ### A3. Constant variance (homoscedasticity)
-The variance should remain constant regardless of $X$ $$\text{Var}(\epsilon_i | X) = \sigma^2$$
+The variance should remain constant regardless of $X$, i.e., $$\text{Var}(\epsilon_i | X) = \sigma^2$$ As can be seen below:
+
+```{r}
+#| echo: false
+#| warning: false
+a3_violation <- tibble(
+  x = rnorm(200, 10, 10),
+  e = rnorm(200, 0, x),
+  y = 2 * x + e,
+  y_i = 2 * x
+)
+
+a3_plot <- a3_violation |>
+  ggplot(aes(x, y)) +
+  geom_point() +
+  geom_smooth(
+    method = lm,
+    se = F
+  )
+a3_plot
+```
+
+A way to assess this is by creating a residual plot, which detects systematic variation not captured by the model. Such a plot graphs the error against the x-value.
+
+```{r}
+#| echo: false
+#| warning: false
+a3_residual_plot <- a3_violation |>
+  ggplot(aes(x, (y - y_i))) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+a3_residual_plot
+```
 
 ### A4. Uncorrelated errors
-A violation of the uncorrelated errors assumption means that the estimated standard errors are wider than 
+A violation of the uncorrelated errors assumption means that the estimated standard errors are underestimated, i.e., narrower than they should be. This may result in erroneously calling a relationship statistically significant when it isn't.
 
 Broadly speaking, there are three types of violation here. The first involves positively correlated errors:
+
+The second involves negatively correlated errors:
+
+The third involves accidental 
 
 ### A5.
 The error terms are distributed normally
 
 # Week 5
+## Multiple regression
+When we presume independence between the IVs (i.e., no interaction), the $\beta$-coefficient of each IV is interpreted as the marginal effect of the associated IV on the DV *holding all else equal*.
 
+The minimisation problem in a multiple regression involving $k$ independent variables is a simple extension of the minimisation problem in bivariate regression, except with $k + 1$ equations to solve
+
+To manually retrieve the controlled effect of an IV of interest on the DV, we conduct the following steps:
+
+- Regress the confounder on the DV and retrieve the residual of this regression
+- Regress the confounder on the IV and retrieve the residual of this regression
+- Regress the residuals on one another; the slope coefficient is the marginal effect of the IV on the DV *ceteris paribus*
+
+## Directed Acyclic Graphs (DAGs)
+Directed acyclic graphs (DAGs) are node-edge graphs that formalise our theory/hypothesis of some causal mechanism between an *exposure*, our IV of interest, and an *outcome*, our DV of interest. They are directed because the edges are unidirectional, often represented by arrows linking an *ancestor* to a *descendant*. They are 'acyclic' because none of the arrows emanating out of the exposure variable comes back to the exposure. The absence of an arrow between two variables implies an argument of no causality, which is as theoretically important as the presence of them.
+
+Other than exposure or outcome variables, there are three other general classes of nodes
+
+- Mediators, nodes on the causal pathway between the exposure and outcome; divided into
+  - Partial mediators, mediators which do not account for the entire causal pathway
+  - Full mediators, mediators which serve as intermediaries for the entire causal effect
+- Confounders, nodes that are ancestors of the exposure and the outcome/a mediator and therefore induce a non-causal association between the two
+- Colliders, nodes where two or more causal effects meet
+
+Controlling for mediators and confounders blocks the path, whereas controlling for a collider opens it up.
+
+## Control variables
+A control variable that decreases estimation bias must fulfil *all* of the following criteria:
+
+- Is a confounder or a proxy of a(n unobserved) confounder
+- Is not a collider
+
+Aside from having a causal effect on the exposure, it can have a causal effect on either the outcome or some mediator.
+
+A control variable increases estimation bias when it meets *any one* of the following criteria:
+
+- Is a collider, wherever relative to the exposure/outcome it is (including as an ancestor)
+- Is downstream of the causal effect, even if it's 'only' downstream of the mediator
+- Is an ancestor of the exposure when a confounder remains unobserved/uncontrolled for (bias amplification)
+- Is a mediator
+
+Some controls do not change estimation biases but have other (positive/negative) effects, such as
+
+- (+ve) A different IV that does not also cause variation on the exposure *or mediator*
+  - Increases estimate precision (lower variance) by reducing variation on the outcome *or mediator*
+- (+ve) A variable mediating the relationship between the exposure and some collider $W$
+  - Gives the $W$-specific outcome of the exposure on the outcome
+- (-ve) An ancestor of the exposure that doesn't also cause variation on the outcome
+  - Decreases estimate precision (higher variance) by reducing variation on the exposure
+- (-ve) A different DV that is not causally connected to the outcome (of interest)
+  - Decreases estimate precision (higher variance) by reducing variation on the exposure
 
 # Week 6
 ## Confidence intervals
@@ -442,6 +625,8 @@ $$
 
 The above gives us the smallest significance level at which $H_0$ can be rejected, given the resulting $t_{(n - k - 1)}^*$.
 
+**Note**: the p-value is the likelihood of seeing a t-score at least as extreme as the test statistic given a null world, which is in turn equivalent to the probability of rejecting $H_0$ given $H_0$ is true.
+
 ## Categorical/binary variables
 'Qualitative' (nominal, sometimes ordinal) explanatory variables^[Regressing them as DVs is the topic of a future section] can be reduced to one, or a series of, binary (often called 'dummy') variables. When reducing/recoding to binary variables, it is good practice to
 
@@ -526,3 +711,171 @@ Interpreting continuous interactions is trickier, but there are simple tricks (e
 
 Additionally, interaction estimates should be accompanied by the correct standard error calculation formula. The standard error of $X_1$'s marginal effect on $Y$, $\frac{\partial Y}{\partial X_1}$ is
 $$\hat{\sigma}_{\frac{\partial Y}{\partial X_1}} = \sqrt{\text{Var}(\hat{\beta}_1) + X_2^2 {Var}(\hat{\beta}_3) + 2X_2 \text{Cov}(\hat{\beta}_1,\hat{\beta}_3)}$$
+
+# Week 7
+Hi
+
+# Week 8
+## Revisiting OLS assumptions
+1. Linearity; that is, reducible to the form $Y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + ... + \beta_k x_k + \epsilon$
+2. Zero conditional mean; that is, $E[\epsilon|x_1, x_2, ..., x_n] = 0$
+3. Homoscedasticity; that is, $\text{Var}(\epsilon|x_1, x_2, ..., x_n) = \sigma_\epsilon^2$
+4. Uncorrelated errors; that is, $\text{Cov}(\epsilon_i, \epsilon_j|x_i, x_j) = 0 \forall i \neq j$
+5. $X$ is non-stochastic
+   - Every time some $X_i = x_i$ gets picked up in a sample, the value always comes out the same
+   - Implication: there is no measurement error
+6. Normally distributed errors; that is, $\epsilon_i \sim \mathcal{N}(0, \sigma_\epsilon^2)$ and therefore $Y_i \sim \mathcal{N}(\mu_i, \sigma_\epsilon^2)$ 
+   - Implies that the error terms and $Y_i$ are spread along the exact same distribution
+7. No multicollinearity between IVs (also known as 'covariates')
+
+## More properties
+- The OLS estimator is unbiased, i.e., $E[\hat{\beta}_j] = \beta_j$ if
+  - The errors have zero expectation, $E(\epsilon) = 0$
+- Under full assumptions, the OLS has the minimum variance $\therefore$ the highest efficiency (BLUE)
+
+## Issue 1: Misspecification
+**Motivation**: we want to find out the bias of our model/estimator, but we cannot when using real-world data because we don't know whether the model is misspecified or otherwise.
+
+**Implication**: We assess OLS properties under the prior assumption of misspecification. We do this by simulating data.
+
+Let the true parameters be known and the DGP be defined by the following equation:
+$$ \begin{array}{rl}
+Y &= \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \epsilon \\
+\epsilon &\sim \mathcal{N}(0, \sigma_\epsilon^2)
+\end{array} $$
+
+with
+
+$$ \begin{array}{rl}
+x_1 &= \alpha x_2 + \nu \\
+\nu &\sim \mathcal{N}(0, \sigma_\nu^2)
+\end{array} $$
+
+For $\alpha \neq 0$, as $\sigma_\nu^2 \rightarrow 0$, we'll approach exact linear dependency.
+
+Our goal here is to see how a misspecified model fares against the correct model given some perfectly knowable DGP. We want to know the size/direction of the bias in some coefficient, say $\beta_1$.
+
+Given some misspecified model $Y = \beta_0^* + \beta_1^* x_1 + \epsilon$, we can show that
+$$ \begin{array}{rll}
+E[\beta_1^*] &= \beta_1 + \beta_2 \hat{\delta} \\
+E[\beta_1^*] - \beta_1 &= \beta_2 \hat{\delta} &&\equiv \text{OVB} \\
+&= 0 &&\Longleftrightarrow (\beta_2 = 0) \vee (\hat{\delta} = 0)
+\end{array} $$
+
+### Monte Carlo simulation
+- Computational approach to study what happens when any of the OLS assumptions are not met
+- Estimates unknown quantities by repeatedly drawing random samples from a known or assumed population, usually by generating fresh draws from some pre-specified DGP
+  - In this case, a distribution with fully known and pre-specified parameters
+- It must have a
+  - Systematic component (relationship between $X$ and $Y$)
+  - Stochastic component (random noise, usually $\mathcal{N}(\mu_i, \sigma_\epsilon^2)$)
+- Key processes in a Monte Carlo study
+  - Simulate data for the explanatory variable $X$
+  - Use the assumed DGP, including $\epsilon$, to generate the dependent variable $Y$
+  - Estimate the model repeatedly and examine the resulting sampling distribution
+  
+#### Steps
+1. Generate 'fake' data $X$ (i.e., simulate it) and assume we know the
+   - True coeffs $\beta$
+   - True DGP, including the errors $\epsilon$
+2. Given $X$, **true** $\beta$, and $\epsilon$ as an `rnorm`, calculate $Y$ from the assumed true linear model
+3. Given $Y$ and $X$, run an OLS and extract the **estimated coefficients** $\hat{\beta}_j$
+4. Repeat steps 2. and 3. e.g., 1000 times and retrieve the empirical sampling distribution 
+   - Similar to QoI simulation steps, except simulation is now based on assumed truth to see what happens when assumptions are violated
+
+#### Steps (specific to the previous example)
+1. Set `nobs`
+2. Set values for $x_2$ and generate values for $x_1$ 
+   - Remember, $x_1$ is the sum of $\alpha x_2 + \epsilon \sim \mathcal{N}(0, \sigma_\nu^2)$
+   - In programming terms, $x_2 =$ `rnorm(nobs, 0,` $\sigma_\nu^2$`)`
+3. Generate $Y$ as $\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \epsilon$ *and* $\beta_0^* + \beta_1^* X_1 + \epsilon$
+4. Draw a sample from this distribution, then run an OLS; retrieve $\hat{\beta}_1$ and $\hat{\beta}_1^j$
+5. Run 3. and 4. until you get `nobs` samples and `nobs` sets of $\hat{\beta}_1$ and $\hat{\beta}_1^j$
+6. Plot and compare the simulated sampling distributions for both
+
+### Issue 2: measurement error
+**Motivation**: recall the previous setup of X. It was generated once and held constant in every simulation. There is no 'randomness' or 'error' in the X itself. What if that wasn't the case and the measurements were erroneous?
+
+**Implication**: simulate errors as a robustness check and see how 'far' the error needs to get before $H_0$ can no longer be rejected at our significance level of interest.
+
+- Let a model $Y = \beta_0 + \beta_1 X + u$ have an imperfectly observed $X^* = X + e$
+- Since $X = X^* - e$, $Y = \beta_0 + \beta_1 X^* + (u - \beta_1 e)$
+- Given the assumption of zero correlation between $e$ and $X$, there must therefore be a non-zero correlation between $e$ and $X^*$
+- Given assumptions 4 and 5, the correlation between $e$ and $X^*$ will yield biased estimates
+  - When estimating via OLS, we get the asymptotic property $\hat{\beta}_1 \rightarrow \frac{\sigma_u^2}{\sigma_u^2 + \sigma_e^2} \beta_1$
+- This attenuation bias, introduced through measurement error, biases estimates towards 0
+- In multiple regression, it may go both ways (attenuation or amplification)
+
+#### Monte Carlo study for measurement error
+- Simulate $X$ without and with the measurement error, respectively
+- With an asymptotic attenuation bias, the size of the measurement error can be defined by varying $\sigma_e^2$
+- Expectation: sample measurement for \hat{\beta}_1 (for $X^*$) biased towards 0
+- Robustness: which level of measurement error renders our coefficients insignificant
+
+#### What if the measurement error affects our DV instead?
+- Let $Y^* = Y + u$
+- Then $Y + u = \beta_0 + \beta_1 X + e$ and $\therefore Y  = \beta_0 + \beta_1 X + (e - u)$
+- The coefficient $\beta_1$ remains unchanged, although the variance increases (less precise estimate)
+
+### Issue 3: Multicollinearity
+- High correlation between IVs/covariates, not limited to pairwise
+- Leads to 'instability' in regression estimates (effect is similar to having a small $n$)
+- Recall sampling variance of the OLS estimator $$\text{Var}(\hat{\beta}_j) = \frac{\sigma_\epsilon^2}{\Sigma (x_{ij} - \bar{x}_J)^2(1 - R_j^2)}$$ with
+  - $R_j^2$ being the linear relationship between IVs, i.e., $R^2$ from a regression of $x_j$ on all other IVs
+  - $\sigma_\epsilon^2$ being the error variance (noise)
+  - $\Sigma (x_{ij} - \bar{x}_J)^2$ being thesample variance in $x_j$
+- Given the above $1 - R_j^2$
+  - As $R_j^2 \rightarrow 1$, $1 - R_j^2$ decreases, the denominator decreases, and therefore variance increases
+  - Implication: more sample variation in xj can be explained by the other covariates
+- Consequently, we get strongly correlated covariates, which can be interpreted as
+  - There being little variance in $x_i$ when $x_{-i}$ are fixed, and therefore
+  - There being little information about the impact of $x_i$ on $Y$ holding $x_{-i}$ constant
+- Strong, but less than perfect, multicollinearity increases the sampling variance of OLS coefficients
+  - Increasing the SEs and the size of the CIs
+  - Affecting hypothesis testing
+- Nonetheless, this does not bias the coefficient
+
+#### How to detect multicollinearity
+- Correlation tables work for a first-pass indication, but pairwise correlations cannot reveal highly collinear linear combinations
+- For diagnostics (and only for diagnostics), use $\text{VIF}_j = \frac{1}{(1 - R_j^2)}$, the variance-inflation factor
+  - Ultimately, thresholds are arbitrary and you can't improve the model using this information
+- You can also create indices merging some of the IVs using factor analysis
+
+### Issue 4: Heteroscedasticity
+Causes:
+
+- Can be because of model misspecification
+  - Transform IVs and potentially DV through log, square, square-root
+  - Plot the residual against the respective variables to find candidates for transformation
+- Can be due to outliers/high-leverage points (influential observations)
+
+### Issue 5: Influential observations
+- Need to
+  - Identify observations dominating the estimates
+  - Assess how results change when such dominating observations are dropped
+
+#### Terms
+- Outlier: observations with *large residuals*
+- Leverage: How far a covariate deviates from the mean
+  - A high-leverage observation has an extreme value on the IV
+  - It has an effect on $\beta_i, i \neq 0$ (the regression coefficients)
+- Influence: TWE removing an observation changes the estimate of a coefficient
+
+#### Cook's distance
+Cook's distance is a measure of influence, aggregating both concepts of outliers and leverage $$D_j = \frac{\Sigma_{j = 1}^n(\hat{y}_j - \hat{y}_{j \backslash i})^2}{(k+1)\hat {\sigma}^2}$$ with
+  - $k$ being the number of covariates/IVs
+  - $\hat{\sigma}^2$ being the estimated error variance
+  - $\hat{y}_{j \backslash i}$ being the predicted value for $j$ without observation $i$
+It is a measure of distance based on the *difference in predicted values with or without a specific observation*.
+
+**Note**: it is model-specific (you cannot compare the Cook's distance values between different models)
+
+Rules of thumb
+
+- Fixed, often more relaxed: $D_j > 1$
+- $n$-dependent, often stricter: $D_j > \frac{4}{n}$, with $n$ being the sample size (Bollen & Jackman, 1990)
+
+#### How to handle influential observations
+- Create a binary variable in your dataset, which takes the value 1 when Cook's distance is 'too large' given the above guidelines
+- Respecify the model to account for outliers. Do they have anything in common?
+- Potentially, drop observations from analysis (and acknowledge this in your writeup). Do you still have the same results?
