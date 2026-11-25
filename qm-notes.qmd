@@ -1007,3 +1007,23 @@ Y_i &\sim f(\theta_i, \alpha) && \text{(stochastic)} \\
 $$
 
 We saw the systematic component earlier!
+
+# Week 12
+## Poisson regression
+### A note on the independence assumption of the Poisson distribution
+- We note that the Poisson distribution roughly approximates the binomial distribution, allowing us to represent its mean as $np$ and its variance as $np(1 - p)$
+- We also note that in the Poisson distribution, $\lambda$ gives both mean and variance, implying $np = np(1 - p)$
+- For that to be true, $p$ must be 'negligibly small' such that $1 - p = 1$
+- We approximate the Poisson distribution as a binomial distribution and, say, divide the relevant period (e.g., a year) into infinitesimally small 'pieces of time'. When we zoom into each morsel of time, we find that the probability of the event happening is negligible.
+- Re-appraising the Poisson distribution as a binomial distribution is what allows the mean-variance equality. Binomial regression necessitates that we assume independence of trials, and therefore this applies to the Poisson regression too.
+
+## Negative binomial regression
+The negative binomial regression relaxes the mean-variance equality condition of the Poisson regression by adding an overdispersion parameter $\theta$ s.t. $$f(y_i|\lambda_i, \theta) = \frac{\Gamma(y_i + \theta)}{y! \Gamma(\theta)} \times \frac{\lambda_i^{y_i}\theta^\theta}{(\lambda_i + \theta)^{y_i + \theta}}$$
+The mean remains $E(Y_i) = \lambda_i = e^{X_i\beta}$, but now the variance is $$\text{Var}(Y_i) = \lambda_i + \frac{1}{\theta} \lambda_i^2 = \lambda_i + \alpha \lambda_i^2$$
+
+### The Likelihood Ratio Test and diagnosing model issues
+When a model yields statistically significant results at the $p < 0.01$ level *across the board*, that is reason for suspicion. Instead of rejoicing, we must entertain the possibility of underestimated SEs. 
+
+Appropriately, this is a known issue when estimating overdispersed data with a Poisson regression model. To find out whether we have statistically significant overdispersion, we conduct a likelihood-ratio test (LRT).
+
+We work with the $H_0$ that $\alpha = 0$ and the $H_A$ that it isn't. Rejecting $H_0$ means that we have overdispersion, necessitating the use of the negative binomial model.
